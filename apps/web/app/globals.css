@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+/* Subtle editorial feel: tighter type rendering + quiet grain */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-brand-bg text-brand-text font-sans antialiased;
+  background-image: theme("backgroundImage.hero-radial"), theme("backgroundImage.grain");
+  background-repeat: no-repeat, repeat;
+  background-size: cover, 160px 160px;
+}
+
+a {
+  @apply text-brand-text hover:text-white;
+}
+
+::selection {
+  background: rgba(201, 162, 77, 0.35);
+}
+
+/* Minimal form resets */
+input,
+textarea,
+select {
+  @apply bg-transparent;
+}
