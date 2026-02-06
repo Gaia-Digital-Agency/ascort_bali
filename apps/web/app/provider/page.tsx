@@ -9,6 +9,8 @@ export default function ProviderPanel() {
   const [description, setDescription] = useState("Describe your service...");
   const [price, setPrice] = useState(100);
   const [duration, setDuration] = useState(60);
+  const [mainImageUrl, setMainImageUrl] = useState("");
+  const [galleryImageUrls, setGalleryImageUrls] = useState(["", "", "", ""]);
 
   useEffect(() => {
     (async () => {
@@ -38,6 +40,8 @@ export default function ProviderPanel() {
         body: JSON.stringify({
           title,
           description,
+          mainImageUrl: mainImageUrl.trim() || null,
+          galleryImages: galleryImageUrls.map((url) => url.trim()).filter(Boolean),
           basePrice: price,
           durationMinutes: duration,
         }),
@@ -104,6 +108,33 @@ export default function ProviderPanel() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
+            </Field>
+
+            <Field label="MAIN IMAGE URL">
+              <input
+                className="w-full rounded-2xl border border-brand-line bg-brand-surface2/40 px-4 py-3 text-sm outline-none focus:border-brand-gold/60"
+                value={mainImageUrl}
+                onChange={(e) => setMainImageUrl(e.target.value)}
+                placeholder="https://..."
+              />
+            </Field>
+
+            <Field label="GALLERY IMAGE URLS (UP TO 4)">
+              <div className="space-y-3">
+                {galleryImageUrls.map((url, index) => (
+                  <input
+                    key={index}
+                    className="w-full rounded-2xl border border-brand-line bg-brand-surface2/40 px-4 py-3 text-sm outline-none focus:border-brand-gold/60"
+                    value={url}
+                    onChange={(e) => {
+                      const next = [...galleryImageUrls];
+                      next[index] = e.target.value;
+                      setGalleryImageUrls(next);
+                    }}
+                    placeholder={`https://... (${index + 1})`}
+                  />
+                ))}
+              </div>
             </Field>
 
             <div className="grid grid-cols-2 gap-3">

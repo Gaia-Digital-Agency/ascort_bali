@@ -10,7 +10,7 @@ const ListQuery = z.object({
   category: z.string().uuid().optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(50),
-  sort: z.enum(["newest", "price_asc", "price_desc", "featured"]).default("featured"),
+  sort: z.enum(["newest", "updated", "price_asc", "price_desc", "featured"]).default("featured"),
 });
 
 servicesRouter.get("/", async (req, res) => {
@@ -28,6 +28,8 @@ servicesRouter.get("/", async (req, res) => {
   const orderBy =
     sort === "newest"
       ? { createdAt: "desc" as const }
+      : sort === "updated"
+      ? { updatedAt: "desc" as const }
       : sort === "price_asc"
       ? { basePrice: "asc" as const }
       : sort === "price_desc"
@@ -60,6 +62,8 @@ servicesRouter.get("/:id", async (req, res) => {
 const UpsertSchema = z.object({
   title: z.string().min(3).max(120),
   description: z.string().min(10).max(4000),
+  mainImageUrl: z.string().min(1).optional().nullable(),
+  galleryImages: z.array(z.string().min(1)).max(4).optional().nullable(),
   categoryId: z.string().uuid().nullable().optional(),
   basePrice: z.coerce.number().positive(),
   durationMinutes: z.coerce.number().int().min(5).max(24*60),
@@ -75,6 +79,8 @@ servicesRouter.post("/", requireAuth, requireRole(["provider","admin"]), async (
       creatorId: req.user!.id,
       title: parsed.data.title,
       description: parsed.data.description,
+      mainImageUrl: parsed.data.mainImageUrl ?? null,
+      galleryImages: parsed.data.galleryImages ?? null,
       categoryId: parsed.data.categoryId ?? null,
       basePrice: parsed.data.basePrice.toFixed(2),
       durationMinutes: parsed.data.durationMinutes,
@@ -98,6 +104,8 @@ servicesRouter.put("/:id", requireAuth, requireRole(["provider","admin"]), async
     data: {
       title: parsed.data.title,
       description: parsed.data.description,
+      mainImageUrl: parsed.data.mainImageUrl ?? null,
+      galleryImages: parsed.data.galleryImages ?? null,
       categoryId: parsed.data.categoryId ?? null,
       basePrice: parsed.data.basePrice.toFixed(2),
       durationMinutes: parsed.data.durationMinutes,

@@ -43,6 +43,20 @@ analyticsRouter.post("/visit", async (req, res) => {
   res.json({ visitorId: visitor.id });
 });
 
+analyticsRouter.get("/status", async (req, res) => {
+  const ip = req.ip || "0.0.0.0";
+  const ipHash = hmacIp(ip);
+
+  const [visitorCount, visitor] = await Promise.all([
+    prisma.visitor.count(),
+    prisma.visitor.findUnique({ where: { ipHash } }),
+  ]);
+
+  const location = [visitor?.city, visitor?.country].filter(Boolean).join(", ") || "Unknown";
+
+  res.json({ visitorCount, ip, location });
+});
+
 const LinkSchema = z.object({
   visitorId: z.string().uuid(),
 });

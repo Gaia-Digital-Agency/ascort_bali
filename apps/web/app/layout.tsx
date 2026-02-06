@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AnalyticsBeacon } from "../components/AnalyticsBeacon";
+import { FooterStatus } from "../components/FooterStatus";
 import { Inter, Playfair_Display } from "next/font/google";
 
 const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -38,8 +39,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <main className="mx-auto max-w-6xl px-4 py-10">{children}</main>
 
-        <footer className="border-t border-brand-line py-10 text-center text-xs tracking-[0.18em] text-brand-muted">
-          BUILT AS A GENERIC MARKETPLACE SCAFFOLD.
+        <footer className="border-t border-brand-line">
+          <FooterStatus />
         </footer>
       </body>
     </html>

@@ -106,7 +106,7 @@ export function MainAdSpaces() {
   return (
     <div className="grid gap-5 md:grid-cols-3">
       {ads.map((ad) => (
-        <div key={ad.slot} className="group overflow-hidden rounded-3xl border border-brand-line bg-brand-surface/50 shadow-luxe">
+        <div key={ad.slot} className="group overflow-hidden rounded-3xl border border-brand-gold/60 bg-brand-surface/50 shadow-luxe">
           <div className="relative h-64">
             <Image src={ad.image} alt={ad.title} fill className="object-cover transition duration-700 group-hover:scale-[1.03]" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10" />

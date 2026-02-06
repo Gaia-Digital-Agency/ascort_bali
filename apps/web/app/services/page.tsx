@@ -20,7 +20,7 @@ export default async function ServicesPage({
   const qs = new URLSearchParams({
     page: String(page),
     pageSize: "50",
-    sort: "featured",
+    sort: "updated",
     ...(q ? { q } : {}),
   });
 

@@ -1,8 +1,22 @@
 import Link from "next/link";
-import { HeroAdCards, MainAdSpaces } from "../components/AdvertisingSpaces";
+import { MainAdSpaces } from "../components/AdvertisingSpaces";
+import { API_BASE } from "../lib/api";
 
-export default function Page() {
-  const servicePlaceholders = Array.from({ length: 50 }, (_, index) => index + 1);
+type Service = {
+  id: string;
+  title: string;
+  description: string;
+  basePrice: string;
+  durationMinutes: number;
+  mainImageUrl?: string | null;
+};
+
+export default async function Page() {
+  const qs = new URLSearchParams({ page: "1", pageSize: "50", sort: "updated" });
+  const res = await fetch(`${API_BASE}/services?${qs.toString()}`, { cache: "no-store" });
+  const data = await res.json();
+  const services = (data.items ?? []) as Service[];
+  const serviceSlots = Array.from({ length: 50 }, (_, index) => services[index] ?? null);
 
   return (
     <div className="space-y-20">
@@ -27,16 +41,11 @@ export default function Page() {
         </div>
       </section>
 
-      {/* SECTION: HERO AD SPACES */}
-      <section className="rounded-3xl border border-brand-line bg-brand-surface/50 p-8 md:p-12">
-        <HeroAdCards />
-      </section>
-
       {/* SECTION: SERVICES PLACEHOLDERS */}
       <section className="space-y-6">
         <div>
           <div className="text-xs tracking-luxe text-brand-muted">SERVICES</div>
-          <h2 className="mt-3 font-display text-3xl md:text-4xl">50 service cards (placeholder)</h2>
+          <h2 className="mt-3 font-display text-3xl md:text-4xl">Latest service updates</h2>
         </div>
 
         <div className="grid gap-4 md:grid-cols-5">
@@ -73,34 +82,63 @@ export default function Page() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {servicePlaceholders.map((index) => (
-            <div key={index} className="rounded-2xl border border-brand-line bg-brand-surface/50 p-6">
-              <div className="text-[10px] tracking-[0.22em] text-brand-muted">SERVICE {index}</div>
-              <div className="mt-4 h-24 rounded-xl bg-black/30" />
-              <div className="mt-4 text-sm text-brand-muted">Creator details will appear here.</div>
-            </div>
-          ))}
+          {serviceSlots.map((service, index) => {
+            if (!service) {
+              return (
+                <div
+                  key={`placeholder-${index}`}
+                  className="rounded-2xl border border-brand-line bg-brand-surface/40 p-5"
+                >
+                  <div className="text-[10px] tracking-[0.22em] text-brand-muted">SERVICE SLOT {index + 1}</div>
+                  <div className="mt-4 h-24 rounded-xl bg-black/30" />
+                  <div className="mt-4 text-sm text-brand-muted">Awaiting creator submission.</div>
+                </div>
+              );
+            }
+
+            const cardBody = (
+              <>
+                <div className="relative h-40">
+                  <img
+                    src={service.mainImageUrl || "/placeholders/card-2.jpg"}
+                    alt={service.title}
+                    className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                </div>
+                <div className="p-5">
+                  <div className="text-[10px] tracking-[0.22em] text-brand-muted">
+                    {service.durationMinutes} MIN • {service.basePrice}
+                  </div>
+                  <div className="mt-3 font-display text-lg leading-snug group-hover:text-white">{service.title}</div>
+                  <div className="mt-2 line-clamp-2 text-sm text-brand-muted">{service.description}</div>
+                </div>
+              </>
+            );
+
+            if (index === 0) {
+              return (
+                <Link
+                  key={service.id}
+                  href={`/services/${service.id}`}
+                  className="group overflow-hidden rounded-2xl border border-brand-line bg-brand-surface/50"
+                >
+                  {cardBody}
+                </Link>
+              );
+            }
+
+            return (
+              <div key={service.id} className="group overflow-hidden rounded-2xl border border-brand-line bg-brand-surface/50">
+                {cardBody}
+              </div>
+            );
+          })}
         </div>
       </section>
 
-      {/* SECTION: TESTIMONIALS */}
-      <section className="grid gap-5 md:grid-cols-3">
-        <Testimonial
-          quote="Everything feels premium without being heavy. The structure is exactly what we needed."
-          author="Operations Lead"
-        />
-        <Testimonial
-          quote="The dark editorial tokens are consistent across pages — easy to extend and brand."
-          author="Product Designer"
-        />
-        <Testimonial
-          quote="JWT sessions + RBAC + analytics built-in saved days of setup."
-          author="Developer"
-        />
-      </section>
-
       {/* CTA BAND */}
-      <section className="relative overflow-hidden rounded-3xl border border-brand-line bg-brand-surface/50 p-10 md:p-14">
+      <section className="relative overflow-hidden rounded-3xl border border-brand-gold/60 bg-brand-surface/50 p-10 md:p-14">
         <div className="absolute inset-0 bg-gradient-to-r from-brand-gold/10 via-transparent to-transparent" />
         <div className="relative flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
           <div>
@@ -127,16 +165,6 @@ export default function Page() {
           </div>
         </div>
       </section>
-    </div>
-  );
-}
-
-function Testimonial({ quote, author }: { quote: string; author: string }) {
-  return (
-    <div className="rounded-3xl border border-brand-line bg-brand-surface/50 p-7">
-      <div className="font-display text-3xl text-brand-gold/80">“</div>
-      <div className="mt-2 text-sm leading-7 text-brand-text">{quote}</div>
-      <div className="mt-6 text-xs tracking-[0.22em] text-brand-muted">{author}</div>
     </div>
   );
 }

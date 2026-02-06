@@ -107,6 +107,8 @@ model Service {
 
   title          String
   description    String
+  mainImageUrl   String?
+  galleryImages  Json?
   categoryId     String?
   category       Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 

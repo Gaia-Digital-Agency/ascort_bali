@@ -5,8 +5,6 @@ It connects **Registered Users** with **Creator Users**, supports browsing, filt
 
 This document is the **single source of truth** for architecture, stack, data model, development plan, estimates, and risks—so the team can align and start building.
 
----
-
 ## 1) Product Goals
 
 - High-visual, premium homepage (agency-style reference)
@@ -16,8 +14,6 @@ This document is the **single source of truth** for architecture, stack, data mo
 - Scalable cloud deployment on **GCP**
 - Privacy-aware visitor analytics (**IP hashed**, never raw)
 - Clean database model suitable for long-term growth
-
----
 
 ## 2) High-Level Features
 
@@ -49,8 +45,6 @@ This document is the **single source of truth** for architecture, stack, data mo
 - Link visitor to user after login/registration
 - Activity logs with metadata (JSON)
 
----
-
 ## 3) Tech Stack
 
 ### Frontend
@@ -81,8 +75,6 @@ This document is the **single source of truth** for architecture, stack, data mo
 - Cloud SQL (Postgres)
 - Secret Manager (JWT secrets, hashing keys)
 
----
-
 ## 4) System Architecture (High Level)
 
 ```text
@@ -111,8 +103,6 @@ NGINX (Compute Engine)
 - JWT for stateless auth
 - Explicit audit trail for purchases and key actions
 
----
-
 ## 5) Authentication & Security
 
 ### Authentication
@@ -131,8 +121,6 @@ NGINX (Compute Engine)
 - Audit-grade logging for purchases and key actions
 - Rate limiting (especially auth + analytics endpoints)
 
----
-
 ## 6) Visitor Analytics (Privacy-Aware)
 
 ### What is collected
@@ -149,8 +137,6 @@ NGINX (Compute Engine)
 - Use **HMAC-SHA256** with a server-side secret key.
 - Store the hashing key in **Secret Manager** and version it.
 - Consider retention policies (e.g., aggregate + purge raw visitor rows after N days if not needed).
-
----
 
 ## 7) Database Schema Overview (Logical)
 
@@ -174,8 +160,6 @@ NGINX (Compute Engine)
 - Enums used for constrained fields
 - Indexes for browsing, filtering, analytics
 - Age >= 18 enforced at DB and app level
-
----
 
 ## 8) ER Diagram (Core)
 
@@ -315,8 +299,6 @@ erDiagram
   }
 ```
 
----
-
 ## 9) ER Diagram (Multi-Select / Lookup Tables)
 
 ```mermaid
@@ -357,8 +339,6 @@ erDiagram
   AVAILABILITY_MODES { int id PK  string name }
   SERVICE_AVAILABILITY { uuid service_id PK, FK  int mode_id PK, FK }
 ```
-
----
 
 ## 10) Repository Layout (Monorepo)
 
@@ -419,8 +399,6 @@ AscortBali/
 - `POST /analytics/visit` (visitor heartbeat or page view)
 - `POST /analytics/link` (link visitor_id to user_id after auth)
 
----
-
 ## 12) Performance Requirements
 
 - Services listing: **50 cards per page**
@@ -431,8 +409,6 @@ AscortBali/
   - orders by user/creator
 - CDN for static/media delivery
 - Avoid N+1 queries (use joins and careful query planning)
-
----
 
 ## 13) Development Plan & Task Breakdown (Phases)
 
@@ -467,8 +443,6 @@ AscortBali/
 - Login sessions via JWT
 - DB migrations running end-to-end
 
----
-
 ### Phase 2 — Marketplace Core (Browse/Search/Service/Order)
 
 **Frontend**
@@ -494,9 +468,6 @@ AscortBali/
 
 **Deliverable**
 - Browse → select service → create order → record payment (stub OK)
-- Favorites + user order history
-
----
 
 ### Phase 3 — Creator Operations + Analytics Linkage
 
@@ -522,8 +493,6 @@ AscortBali/
 - Visits tracked (hashed IP) and linked post-auth
 - Creator pages stable and performant
 
----
-
 ### Phase 4 — Hardening & Production Readiness (GCP + Ops)
 
 **Infra**
@@ -548,8 +517,6 @@ AscortBali/
 **Deliverable**
 - Production deployment baseline on GCP
 - Stable performance and security baseline
-
----
 
 ## 14) Definition of Done (DoD) per Phase
 
@@ -579,8 +546,6 @@ AscortBali/
 - Firewall rules documented; only needed ports open
 - Rate limiting and input sanitization applied
 - Monitoring/logging basics in place; on-call runbook stub exists
-
----
 
 ## 15) Estimated Development Hours (One Developer)
 
@@ -620,7 +585,6 @@ Estimates assume:
 #### Total Build Estimate (Phases 1–4)
 **331–543 hours** for one Developer.
 
----
 
 ## 16) Data Work: Scrape / Massage / Mine Existing 200 Creators
 
@@ -638,8 +602,6 @@ This is separate due to dependency on source format and data quality.
 **97–225 hours**
 
 > If images must be downloaded, resized, de-duplicated, and uploaded to CDN/storage workflow, add **+20–60h**.
-
----
 
 ## 17) Risks & Mitigations (Risk Register)
 
@@ -667,8 +629,6 @@ This is separate due to dependency on source format and data quality.
 - **Risk:** Manual VM ops, patching, and process management increases downtime risk.
 - **Mitigation:** Document standard deployment; use systemd/pm2; automate with CI; enable HA where required; backups + PITR.
 
----
-
 ## 18) Milestones (Gantt-Style in Markdown)
 
 Assuming sequential execution by one Developer, a practical cadence is:
@@ -688,20 +648,12 @@ Assuming sequential execution by one Developer, a practical cadence is:
 5. **M5 — Import 200 Creators (Data Work)**  
    Output: ingestion pipeline + cleaned dataset + validation reports + operational process for updates.
 
----
-
-## 19) Decision Log (Initial)
 
 - ✅ PostgreSQL over MySQL
 - ✅ Cloud SQL over self-managed DB
 - ✅ JWT over session cookies
 - ✅ GCP Load Balancer + CDN + NGINX
 - ✅ Privacy-first analytics (HMAC IP hashing)
-
-Changes to major decisions should be recorded in:
-`/docs/architecture/decisions.md`
-
----
 
 ## 20) Team Agreement
 
@@ -711,8 +663,3 @@ This README defines:
 - baseline architecture and schema direction
 - the implementation roadmap and time expectations
 
----
-
-## 21) Project Name
-
-**AscortBali**
