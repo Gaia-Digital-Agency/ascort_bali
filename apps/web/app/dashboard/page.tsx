@@ -40,14 +40,16 @@ export default function Dashboard() {
         const f = await apiFetch("/me/favorites");
         setFavorites(f);
       } catch (e: any) {
-        // if not logged in, redirect
+        window.location.href = "/auth/login";
       }
     })();
   }, []);
 
   const logout = async () => {
     clearTokens();
-    window.location.href = "/";
+    if (typeof window !== "undefined") {
+      window.location.assign("/");
+    }
   };
 
   return (
@@ -62,6 +64,12 @@ export default function Dashboard() {
         </div>
 
         <div className="flex gap-3">
+          <Link
+            className="rounded-full border border-brand-line px-5 py-2 text-xs font-semibold tracking-[0.22em] text-brand-muted hover:text-brand-text"
+            href="/dashboard#top"
+          >
+            BACK HOME
+          </Link>
           <Link
             className="rounded-full border border-brand-gold/60 px-5 py-2 text-xs font-semibold tracking-[0.22em] text-brand-text hover:border-brand-gold hover:text-white"
             href="/provider"

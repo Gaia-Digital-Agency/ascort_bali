@@ -145,7 +145,7 @@ export default function AdminPage() {
             {me ? `Signed in as ${me.email}` : "Sign in with an admin account."}
           </p>
         </div>
-        <Link className="text-xs tracking-[0.22em] text-brand-muted hover:text-brand-text" href="/">
+        <Link className="text-xs tracking-[0.22em] text-brand-muted hover:text-brand-text" href="/admin#top">
           BACK HOME
         </Link>
       </div>

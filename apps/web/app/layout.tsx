@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AnalyticsBeacon } from "../components/AnalyticsBeacon";
+import { AuthNavButton } from "../components/AuthNavButton";
 import { FooterStatus } from "../components/FooterStatus";
 import { Inter, Playfair_Display } from "next/font/google";
 
@@ -29,15 +30,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span className="ml-1 h-[1px] w-10 bg-brand-gold/70 opacity-70 transition group-hover:opacity-100" />
             </Link>
 
-            <nav className="flex gap-5 text-xs tracking-[0.22em] text-brand-muted">
-              <Link className="hover:text-brand-text" href="/provider">CREATORS</Link>
-              <Link className="hover:text-brand-text" href="/dashboard">USERS</Link>
-              <Link className="hover:text-brand-text" href="/admin">ADMIN</Link>
-            </nav>
+            <AuthNavButton />
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl px-4 py-10">{children}</main>
+        <main id="top" className="mx-auto max-w-6xl px-4 py-10">
+          {children}
+          <div className="mt-12 flex justify-center">
+            <a
+              href="#top"
+              className="rounded-full border border-brand-gold/60 px-6 py-2 text-xs font-semibold tracking-[0.22em] text-brand-text hover:border-brand-gold hover:text-white"
+            >
+              BACK TO TOP
+            </a>
+          </div>
+        </main>
 
         <footer className="border-t border-brand-line">
           <FooterStatus />

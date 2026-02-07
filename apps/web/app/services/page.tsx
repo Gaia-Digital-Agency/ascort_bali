@@ -38,6 +38,10 @@ export default async function ServicesPage({
           </p>
         </div>
 
+        <Link className="text-xs tracking-[0.22em] text-brand-muted hover:text-brand-text" href="/">
+          BACK HOME
+        </Link>
+
         <form className="flex w-full gap-3 md:w-auto" action="/services" method="get">
           <input
             name="q"

@@ -13,9 +13,16 @@ type Service = {
 
 export default async function Page() {
   const qs = new URLSearchParams({ page: "1", pageSize: "50", sort: "updated" });
-  const res = await fetch(`${API_BASE}/services?${qs.toString()}`, { cache: "no-store" });
-  const data = await res.json();
-  const services = (data.items ?? []) as Service[];
+  let services: Service[] = [];
+  try {
+    const res = await fetch(`${API_BASE}/services?${qs.toString()}`, { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      services = (data.items ?? []) as Service[];
+    }
+  } catch {
+    services = [];
+  }
   const serviceSlots = Array.from({ length: 50 }, (_, index) => services[index] ?? null);
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { apiFetch } from "../../lib/api";
 
 export default function ProviderPanel() {
@@ -54,10 +55,15 @@ export default function ProviderPanel() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <div className="text-xs tracking-luxe text-brand-muted">PROVIDER</div>
-        <h1 className="mt-2 font-display text-3xl">Panel</h1>
-        <p className="mt-2 text-sm text-brand-muted">Edit profile and publish services.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-xs tracking-luxe text-brand-muted">PROVIDER</div>
+          <h1 className="mt-2 font-display text-3xl">Panel</h1>
+          <p className="mt-2 text-sm text-brand-muted">Edit profile and publish services.</p>
+        </div>
+        <Link className="text-xs tracking-[0.22em] text-brand-muted hover:text-brand-text" href="/provider#top">
+          BACK HOME
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

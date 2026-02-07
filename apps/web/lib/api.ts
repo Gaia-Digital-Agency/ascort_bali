@@ -4,16 +4,26 @@ export type Tokens = { accessToken: string; refreshToken: string };
 
 export function getAccessToken() {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("accessToken");
+  return window.sessionStorage.getItem("accessToken");
 }
 export function setTokens(t: Tokens) {
-  localStorage.setItem("accessToken", t.accessToken);
-  localStorage.setItem("refreshToken", t.refreshToken);
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem("accessToken", t.accessToken);
+  window.sessionStorage.setItem("refreshToken", t.refreshToken);
+  window.dispatchEvent(new Event("auth:change"));
 }
 
 export function clearTokens() {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem("accessToken");
+    window.sessionStorage.removeItem("refreshToken");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    window.dispatchEvent(new Event("auth:change"));
+  } catch {
+    // ignore
+  }
 }
 
 export async function apiFetch(path: string, init?: RequestInit) {

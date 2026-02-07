@@ -7,10 +7,10 @@ from urllib.parse import urlparse
 from selenium_stealth import stealth
 
 # Path to the JSON file containing the URLs
-PAGE_FILE = 'page.json'
+PAGE_FILE = 'pages_00_sample.json'
 # Output files
-OUTPUT_MARKDOWN_FILE = 'page_output.md'
 OUTPUT_JSON_FILE = 'page_output.json'
+IMAGE_OUTPUT_JSON_FILE = 'image_output.json'
 
 
 def is_cloudflare(driver):
@@ -130,6 +130,11 @@ def scrape_one_page(driver, url_to_scrape):
     data = {}
     data['url'] = url_to_scrape
 
+    # Extract name from URL (segment before the numeric ID)
+    name_match = re.search(r'/([^/]+)/\d+/', url_to_scrape)
+    if name_match:
+        data['name'] = name_match.group(1)
+
     # Extract ID from URL
     id_match = re.search(r'/(\d+)/', url_to_scrape)
     if id_match:
@@ -186,11 +191,13 @@ def scrape_one_page(driver, url_to_scrape):
         except Exception as e:
             print(f"Error processing visible text: {e}")
 
-    # Extract profile images only
+    # Extract profile images - click thumbnails to get full-size URLs
     images = driver.find_elements(By.TAG_NAME, 'img')
     profile_image_pattern = re.compile(r'/preview/(?:400x592|100x100|800x|1200x)/')
     skip_pattern = re.compile(r'logo\.svg|/dist/|track\.|dmca\.com|badge|\.gif$', re.IGNORECASE)
-    profile_images = []
+
+    # Collect clickable thumbnail elements
+    thumbnail_elements = []
     for img in images:
         src = img.get_attribute('src')
         if not src:
@@ -198,7 +205,42 @@ def scrape_one_page(driver, url_to_scrape):
         if skip_pattern.search(src):
             continue
         if profile_image_pattern.search(src):
-            profile_images.append(src)
+            thumbnail_elements.append(img)
+
+    profile_images = []
+    seen_urls = set()
+    for img in thumbnail_elements:
+        try:
+            # Click the thumbnail to open the lightbox
+            parent = img.find_element(By.XPATH, './..')
+            driver.execute_script("arguments[0].click();", parent)
+            time.sleep(2)
+
+            # Look for the large image in the lightbox/overlay
+            large_img_pattern = re.compile(r'/preview/(?:1000x700|800x|1200x)/')
+            lightbox_images = driver.find_elements(By.TAG_NAME, 'img')
+            for li in lightbox_images:
+                li_src = li.get_attribute('src')
+                if li_src and large_img_pattern.search(li_src) and li_src not in seen_urls:
+                    seen_urls.add(li_src)
+                    profile_images.append(li_src)
+                    print(f"    Found full-size: {li_src}")
+
+            # Close the lightbox by pressing Escape or clicking close
+            try:
+                from selenium.webdriver.common.keys import Keys
+                driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.ESCAPE)
+            except Exception:
+                pass
+            time.sleep(1)
+        except Exception as e:
+            # Fallback: use the thumbnail src if clicking fails
+            src = img.get_attribute('src')
+            if src and src not in seen_urls:
+                seen_urls.add(src)
+                profile_images.append(src)
+                print(f"    Fallback thumbnail: {src}")
+
     data['images'] = profile_images
 
     return data
@@ -264,25 +306,22 @@ def scrape_pages():
             if i < len(urls) - 1:
                 time.sleep(3)
 
-        # Write markdown output
-        with open(OUTPUT_MARKDOWN_FILE, 'w', encoding='utf-8') as f:
-            for i, data in enumerate(all_results):
-                if i > 0:
-                    f.write('\n---\n\n')
-                for key, val in data.items():
-                    if key == 'images':
-                        f.write('\n## Images\n')
-                        for src in val:
-                            f.write(f"- {src}\n")
-                    elif key == 'notes':
-                        for note in val:
-                            f.write(f"{note}  \n")
-                    else:
-                        f.write(f"{key}: {val}  \n")
-
         # Write JSON output
         with open(OUTPUT_JSON_FILE, 'w', encoding='utf-8') as f:
             json.dump(all_results, f, indent=2, ensure_ascii=False)
+
+        # Build image_output.json with unique keys per profile ID
+        image_output = []
+        for data in all_results:
+            profile_id = data.get('ID', 'unknown')
+            for idx, img_url in enumerate(data.get('images', []), start=1):
+                image_output.append({
+                    "id": f"{profile_id}_{idx:02d}",
+                    "url": img_url
+                })
+
+        with open(IMAGE_OUTPUT_JSON_FILE, 'w', encoding='utf-8') as f:
+            json.dump(image_output, f, indent=2, ensure_ascii=False)
 
         print(f"\nDone! Scraped {len(all_results)}/{len(urls)} pages.")
 
@@ -291,7 +330,7 @@ def scrape_pages():
     finally:
         if driver:
             driver.quit()
-        print(f"Content saved in {OUTPUT_MARKDOWN_FILE} and {OUTPUT_JSON_FILE}")
+        print(f"Content saved in {OUTPUT_JSON_FILE} and {IMAGE_OUTPUT_JSON_FILE}")
 
 
 if __name__ == '__main__':
